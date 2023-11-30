@@ -1,5 +1,5 @@
 import random
-import settings
+import src.settings as settings
 import discord
 from discord.ext import commands
 from discord.ext import commands
@@ -20,14 +20,42 @@ folder_dict = {
     to from your discord bot
     """
 }
-motivational_texts = ['One more!', 'You can do it!', 'I believe in you!', 'I think you are so cool!', 'My faith in you has never waivered', 'Your dedication to your craft has got me singing in the shower!', 'Never have I ever seen someone so cool', 'If you do this, you will be blessed with so many coconuts', 'Listen to me! I believe in you', 'Never back down!', 'WE ARE SO BACK', 'Liam believes in you', 'Garrin believes in you', 'Kelsey believes in you', 'Ben believes in you', 'C. Chefalas believes in you', 'Anson believes in you', 'Colton believes in you', 'Der Chi Believes in you', 'President Aoun believes in you', 'Daniel believes in you', 'Jakob believes in you', 'Matt believes in you', 'Ethan believes in you', 'Liam is on a bathroom break', 'Just keep biking, just keep biking 🎵', 'Hot dog, hot dog, hot diggity dog!', 'A man, a plan, a canal -- Panama', 'Jerry believes in you', 'Wen believes in you', 'Grant believes in you']
+motivational_texts = [
+    """
+    Motivational texts here
+    """
+]
 
 def authenticate():
     creds = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES) 
     return creds
 
+
 def upload_image(file_path, image_name, folder_id):
+    """
+    Uploads an image file to Google Drive.
+
+    Parameters:
+    - file_path (str): The local path of the image file to be uploaded.
+    - image_name (str): The desired name for the uploaded image file.
+    - folder_id (str): The ID of the Google Drive folder where the image will be uploaded.
+
+    Returns:
+    - nothing
+
+    Raises:
+    - Exception: If authentication fails or if there is an issue uploading the file.
+
+    Usage:
+    ```python
+    upload_image('/local/path/to/image.jpg', 'uploaded_image.jpg', 'google_drive_folder_id')
+    ```
+
+    Note:
+    - Make sure to call `authenticate()` before using this function to obtain valid credentials.
+    - The function assumes that the `authenticate` function is defined elsewhere in your code.
+    """
     creds = authenticate()
 
     service = build('drive', 'v3', credentials=creds)
@@ -44,18 +72,37 @@ def upload_image(file_path, image_name, folder_id):
 
 
 def run():
+    """
+    Run the Discord bot with specified commands and events.
+
+    Usage:
+    - Call this function to start the Discord bot.
+
+    Notes:
+    - Ensure that the `settings` module contains the `DISCORD_API_SECRET` token.
+    - Import and define the `before_dash`, `after_dash`, and `upload_image` functions from your_module.
+    """
     intents = discord.Intents.default()
     intents.message_content = True
 
     bot = commands.Bot(command_prefix="!", intents=intents)
 
-    # Event that runs when the bot is ready
     @bot.event
     async def on_ready():
+        """
+        Runs when bot is ready
+        """
         logger.info(f"User: {bot.user.name}, id: {bot.user.id}")
 
     @bot.event
     async def on_command_error(ctx, error):
+        """
+        Handle command errors and send appropriate messages.
+
+        Parameters:
+        - ctx (commands.Context): The context of the command.
+        - error: The error raised during command execution.
+        """
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Missing argument")
         if isinstance(error, commands.CommandInvokeError):
@@ -69,41 +116,34 @@ def run():
         brief='!v a-1 <img>'
         )
     async def visit(ctx, *cluename):
+        """
+        Command to visit a location by posting an image with a clue name.
+
+        Parameters:
+        - ctx (commands.Context): The context of the command.
+        - *cluename: Variable-length argument to represent the clue name.
+
+        Notes:
+        - Utilizes the `before_dash` and `after_dash` functions.
+        - Assumes the existence of the `folder_dict` and `motivational_texts` variables.
+
+        Usage:
+        !v a-1 <img>
+        """
         if len(ctx.message.attachments) <= 0:
             return await ctx.send('No attachments attached/detected.')
         for attachment in ctx.message.attachments:
             filename = " ".join(cluename) + "." + attachment.filename.split('.')[-1]
 
             identifier = before_dash(cluename[0])
-            print(identifier)
             folder_id = folder_dict[identifier]
-            if identifier == "fi":
-                new_identifier = "F"
-            elif identifier == "cr":
-                new_identifier = "C"
-            elif identifier == "vi":
-                new_identifier = "V"
-            else:
-                new_identifier = identifier
-            
-            print(folder_id)
-            print(identifier)
-
             number = after_dash(cluename[0])
-            print(number)
 
-            if new_identifier == "C":
-                filename = f"{number}-Mickey Mouse Clubhouse"
-            elif new_identifier == "F" or new_identifier == "V":
-                filename = f"{new_identifier}{number}-Mickey Mouse Clubhouse"
-            else:
-                filename = f"{new_identifier}{number}"
+            filename = f"{identifier}{number}" # Or whatever you want to name the file in google drive
 
-            print(filename)
+            # Put in folder of your choice but folder must be made in current repository
+            file_path = f'images/{identifier}/{filename}.{attachment.filename.split(".")[-1]}' 
 
-            file_path = f'images/{identifier}/{filename}.{attachment.filename.split(".")[-1]}'
-
-            print(file_path)
             await attachment.save(file_path)
             upload_image(file_path=file_path, image_name=filename, folder_id=folder_id)
         return await ctx.send(f"Successfully uploaded {cluename}")
@@ -112,6 +152,12 @@ def run():
         aliases = ['say', 'mq', 'mv']
     )
     async def motivate_me(ctx):
+        """
+        Command to send a motivational message.
+
+        Parameters:
+        - ctx (commands.Context): The context of the command.
+        """
         await ctx.send(random.choice(motivational_texts))
 
     bot.run(token=settings.DISCORD_API_SECRET, root_logger=True)
@@ -119,14 +165,53 @@ def run():
 
 #Helper to remove trailing digits of a code
 def remove_trailing_numbers(input_string):
+    """
+    Removes trailing digits from the end of a given string.
+
+    Parameters:
+    - input_string (str): The input string from which trailing digits will be removed.
+
+    Returns:
+    - str: The modified string with trailing digits removed.
+
+    Usage:
+    result = remove_trailing_numbers("example123")
+    print(result)  # Output: "example"
+    """
     modified_string = re.sub(r'\d*$', '', input_string)
     return modified_string
 
 def before_dash(input_string):
+    """
+    Retrieves the substring before the first occurrence of a dash ("-") in a given string.
+
+    Parameters:
+    - input_string (str): The input string from which the substring before the dash will be extracted.
+
+    Returns:
+    - str: The substring before the first dash.
+
+    Usage:
+    result = before_dash("prefix-suffix")
+    print(result)  # Output: "prefix"
+    """
     output = input_string.split('-')[0]
     return output
 
 def after_dash(input_string):
+    """
+    Retrieves the substring after the first occurrence of a dash ("-") in a given string.
+
+    Parameters:
+    - input_string (str): The input string from which the substring after the dash will be extracted.
+
+    Returns:
+    - str: The substring after the first dash.
+
+    Usage:
+    result = after_dash("prefix-suffix")
+    print(result)  # Output: "suffix"
+    """
     output = input_string.split('-')[1]
     return output
 
