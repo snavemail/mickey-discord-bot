@@ -1,0 +1,20 @@
+# .gitignore
+
+# Compiled Python files
+__pycache__/
+
+# Virtual environment
+venv/
+
+# Sensitive JSON files
+config/
+
+# Images folder
+images/
+
+#Logs folder
+logs/
+
+# Configuration files
+.env
+
