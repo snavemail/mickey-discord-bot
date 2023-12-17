@@ -16,11 +16,10 @@ This is a discord google drive bot that was made for Norheastern's 2023 Husky Hu
 the process of uploading photos of clues to a specified Google Drive folder. It also serves as an easy way to upload
 other photos for things like crafts and found items. It saved us a lot of time.
 
-It was packaged with an app and a server. The server was able to store the recorded clues we cracked via CSV and make a 
+It was packaged with an app and a server. The server was able to store the recorded clues we cracked via CSV and then ran a
+search algorithm on the clues to make an optimal route.
 
 ## Features
-
-List key features or functionalities of your project. Use bullet points for clarity.
 
 - Add images to google drive from discord via a command
 - Get motivational quotes for when you are feeling down
@@ -44,4 +43,4 @@ Run this command for random motivational quote
 ```
 ## License
 
-This is protected under the ** Liam Evans ** license
+This is protected under the **Liam Evans** license
